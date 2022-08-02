@@ -8,12 +8,14 @@ import android.graphics.Bitmap
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.RippleDrawable
 import android.media.AudioManager
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.telecom.Call
 import android.telecom.CallAudioState
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
@@ -53,10 +55,16 @@ class CallActivity : SimpleActivity() {
     private var stopAnimation = false
     private var viewsUnderDialpad = arrayListOf<Pair<View, Float>>()
 
+    private var conferenceCallNumber = "-1"
+    private var trackingSimSlot = -1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         supportActionBar?.hide()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_call)
+        if (intent?.action.equals(INTENT_ACTION_CALL_ACTIVITY_CONFIG_UPDATE)) {
+            setConfigData(intent.extras!!);
+        }
 
         if (CallManager.getPhoneState() == NoCall) {
             finish()
@@ -69,11 +77,26 @@ class CallActivity : SimpleActivity() {
         addLockScreenFlags()
         CallManager.addListener(callCallback)
         updateCallContactInfo(CallManager.getPrimaryCall())
+        conferenceCallNumber = config.getConferenceNumber().toString();
+        trackingSimSlot = config.getTrackingSimSlot();
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        updateState()
+        if (intent?.action.equals(INTENT_ACTION_CALL_ACTIVITY_CONFIG_UPDATE)) {
+            setConfigData(intent?.extras!!);
+        } else {
+            updateState()
+        }
+    }
+
+    private fun setConfigData(extras: Bundle) {
+        conferenceCallNumber = extras.getString(INTENT_EXTRA_CONFERENCE_NUMBER, "-1");
+        config.setConferenceNumber(conferenceCallNumber);
+        trackingSimSlot = extras.getInt(INTENT_EXTRA_TRACKING_SIM_SLOT, -1);
+        config.setTrackingSimSlot(trackingSimSlot);
+        Log.d("CallActivity", conferenceCallNumber);
+        Log.d("CallActivity", trackingSimSlot.toString());
     }
 
     override fun onResume() {
@@ -442,13 +465,32 @@ class CallActivity : SimpleActivity() {
         }
     }
 
+    @SuppressLint("MissingPermission")
+    private fun getCallSimCardSlot(): Int {
+        var slot = -2
+        try {
+            val accounts = telecomManager.callCapablePhoneAccounts
+            if (accounts.size > 1) {
+                accounts.forEachIndexed { index, account ->
+                    if (account == CallManager.getPrimaryCall()?.details?.accountHandle) {
+                        slot = index + 1;
+                    }
+                }
+            } else {
+                slot = 1;
+            }
+        } catch (ignored: Exception) {
+        }
+        return slot;
+    }
+
     private fun updateCallState(call: Call) {
         val state = call.getStateCompat()
         when (state) {
             Call.STATE_RINGING -> callRinging()
-            Call.STATE_ACTIVE -> callStarted()
+            Call.STATE_ACTIVE -> callStarted(call)
             Call.STATE_DISCONNECTED -> endCall()
-            Call.STATE_CONNECTING, Call.STATE_DIALING -> initOutgoingCallUI()
+            Call.STATE_CONNECTING, Call.STATE_DIALING -> initOutgoingCallUI(call)
             Call.STATE_SELECT_PHONE_ACCOUNT -> showPhoneAccountPicker()
         }
 
@@ -515,22 +557,36 @@ class CallActivity : SimpleActivity() {
         CallManager.accept()
     }
 
-    private fun initOutgoingCallUI() {
+    private fun initOutgoingCallUI(call: Call) {
         enableProximitySensor()
         incoming_call_holder.beGone()
         ongoing_call_holder.beVisible()
+        if (trackingSimSlot != -1 && conferenceCallNumber != "-1" && getCallSimCardSlot() == trackingSimSlot) {
+            val callNumber = Uri.decode(call.details.handle.toString()).substringAfter("tel:")
+            if (CallManager.isSingleCall() && callNumber != conferenceCallNumber) {
+                callContactWithSimSlot(conferenceCallNumber, trackingSimSlot - 1);
+            }
+        }
     }
 
     private fun callRinging() {
         incoming_call_holder.beVisible()
     }
 
-    private fun callStarted() {
+    private fun callStarted(call: Call) {
         enableProximitySensor()
         incoming_call_holder.beGone()
         ongoing_call_holder.beVisible()
         callDurationHandler.removeCallbacks(updateCallDurationTask)
         callDurationHandler.post(updateCallDurationTask)
+        if (trackingSimSlot != -1 && conferenceCallNumber != "-1" && call.isOutgoing() && getCallSimCardSlot() == trackingSimSlot) {
+            val isDualCall = CallManager.isDualCall();
+            val callNumber = Uri.decode(call.details.handle.toString()).substringAfter("tel:")
+            Log.i("CallActivity", "Call started $callNumber")
+            if (isDualCall && callNumber == conferenceCallNumber) {
+                CallManager.merge();
+            }
+        }
     }
 
     private fun showPhoneAccountPicker() {

@@ -171,6 +171,14 @@ class CallManager {
             call?.playDtmfTone(c)
             call?.stopDtmfTone()
         }
+
+        fun isSingleCall(): Boolean {
+            return calls.size == 1;
+        }
+
+        fun isDualCall(): Boolean {
+            return calls.size == 2;
+        }
     }
 }
 

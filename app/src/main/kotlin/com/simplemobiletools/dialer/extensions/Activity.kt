@@ -41,6 +41,14 @@ fun BaseSimpleActivity.callContactWithSim(recipient: String, useMainSIM: Boolean
     }
 }
 
+fun BaseSimpleActivity.callContactWithSimSlot(recipient: String, slot: Int) {
+    handlePermission(PERMISSION_READ_PHONE_STATE) {
+        val wantedSimIndex = if (slot > 0) 0 else slot
+        val handle = getAvailableSIMCardLabels().sortedBy { it.id }[wantedSimIndex].handle
+        launchCallIntent(recipient, handle)
+    }
+}
+
 // handle private contacts differently, only Simple Contacts Pro can open them
 fun Activity.startContactDetailsIntent(contact: SimpleContact) {
     val simpleContacts = "com.simplemobiletools.contacts.pro"

@@ -103,11 +103,16 @@
         <activity
             android:name=".activities.CallActivity"
             android:excludeFromRecents="true"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/ongoing_call"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:showOnLockScreen="true" />
+            android:showOnLockScreen="true" >
+            <intent-filter>
+                <action android:name="in.runo.dialer.UPDATE_CONFIG" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".activities.DialpadActivity"

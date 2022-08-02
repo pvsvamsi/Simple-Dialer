@@ -145,10 +145,16 @@ class DialpadActivity : SimpleActivity() {
     }
 
     private fun checkDialIntent(): Boolean {
-        return if ((intent.action == Intent.ACTION_DIAL || intent.action == Intent.ACTION_VIEW) && intent.data != null && intent.dataString?.contains("tel:") == true) {
+        return if ((intent.action == Intent.ACTION_DIAL || intent.action == Intent.ACTION_VIEW || intent.action == Intent.ACTION_CALL) && intent.data != null && intent.dataString?.contains(
+                "tel:"
+            ) == true
+        ) {
             val number = Uri.decode(intent.dataString).substringAfter("tel:")
             dialpad_input.setText(number)
             dialpad_input.setSelection(number.length)
+            if (intent.action == Intent.ACTION_CALL) {
+                initCall(number, -1);
+            }
             true
         } else {
             false

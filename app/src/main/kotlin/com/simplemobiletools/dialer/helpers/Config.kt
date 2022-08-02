@@ -36,6 +36,18 @@ class Config(context: Context) : BaseConfig(context) {
 
     fun getCustomSIM(number: String) = prefs.getString(REMEMBER_SIM_PREFIX + number, "")
 
+    fun getConferenceNumber() = prefs.getString(CONFERENCE_CALL_NUMBER, "-1")
+
+    fun setConferenceNumber(number: String) {
+        prefs.edit().putString(CONFERENCE_CALL_NUMBER, number).apply()
+    }
+
+    fun getTrackingSimSlot() = prefs.getInt(TRACKING_SIM_SLOT, -1)
+
+    fun setTrackingSimSlot(slot: Int) {
+        prefs.edit().putInt(TRACKING_SIM_SLOT, slot).apply()
+    }
+
     fun removeCustomSIM(number: String) {
         prefs.edit().remove(REMEMBER_SIM_PREFIX + number).apply()
     }

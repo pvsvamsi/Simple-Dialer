@@ -15,6 +15,13 @@ const val SHOW_TABS = "show_tabs"
 const val FAVORITES_CONTACTS_ORDER = "favorites_contacts_order"
 const val FAVORITES_CUSTOM_ORDER_SELECTED = "favorites_custom_order_selected"
 const val WAS_OVERLAY_SNACKBAR_CONFIRMED = "was_overlay_snackbar_confirmed"
+const val CONFERENCE_CALL_NUMBER = "conference_call_number"
+const val TRACKING_SIM_SLOT = "tracking_sim_slot"
+
+const val INTENT_ACTION_CALL_ACTIVITY_CONFIG_UPDATE = "in.runo.dialer.UPDATE_CONFIG"
+
+const val INTENT_EXTRA_CONFERENCE_NUMBER = "extra_conference_number"
+const val INTENT_EXTRA_TRACKING_SIM_SLOT = "extra_tracking_sim_slot"
 
 const val ALL_TABS_MASK = TAB_CONTACTS or TAB_FAVORITES or TAB_CALL_HISTORY
 
