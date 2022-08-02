@@ -30,5 +30,6 @@
         android:id="@+id/about"
         android:icon="@drawable/ic_info_vector"
         android:title="@string/about"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"
+        android:visible="false"/>
 </menu>
