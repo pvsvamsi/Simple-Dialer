@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Simple Dialer</string>
-    <string name="app_launcher_name">Puhelin</string>
+    <string name="app_name">Yksinkertainen Numerovalitsin</string>
+    <string name="app_launcher_name">Numerovalitsin</string>
     <string name="default_phone_app_prompt">Aseta tämä sovellus oletukseksi puheluille</string>
     <string name="allow_displaying_over_other_apps">Hyväksy näkyminen muiden sovellusten päällä, jotta sovellus toimii luotettavasti</string>
     <!-- Contacts -->
@@ -16,12 +16,14 @@
     <string name="clear_call_history">Tyhjennä puheluhistoria</string>
     <string name="show_call_details">Näytä puhelun tiedot</string>
     <!-- Dialpad -->
-    <string name="dialpad">Numerovalitsin</string>
+    <string name="dialpad">Valintanäppäimistö</string>
     <string name="asterisk">Asteriski</string>
     <string name="hashtag">Risuaita</string>
     <string name="call_number">Soita numeroon</string>
+    <string name="dialpad_beeps">Äänimerkkien ottaminen käyttöön valintanäppäimen napsautuksen yhteydessä</string>
+    <string name="dialpad_vibrations">Ota värinät käyttöön valintanäppäimen napsautuksista</string>
     <!-- Dialer -->
-    <string name="dialer">Puhelin</string>
+    <string name="dialer">Numerovalitsin</string>
     <string name="accept">Hyväksy</string>
     <string name="accept_call">Vastaa puheluun</string>
     <string name="decline">Hylkää</string>
@@ -52,6 +54,13 @@
     <string name="call_add">Lisää puhelu</string>
     <string name="conference_manage">Hallinnoi puhelinneuvottelua</string>
     <string name="conference">Neuvottelu</string>
+    <string name="audio_route_speaker">Speaker</string>
+    <string name="audio_route_earpiece">Earpiece</string>
+    <string name="audio_route_bluetooth">Bluetooth</string>
+    <string name="audio_route_wired_headset">Wired Headset</string>
+    <string name="audio_route_wired_or_earpiece">Wired or Earpiece</string>
+    <string name="choose_audio_route">Choose audio route</string>
+    <string name="calling_blocked_number">The number you are calling is blocked</string>
     <!-- Speed dial -->
     <string name="speed_dial">Pikavalinta</string>
     <string name="manage_speed_dial">Pikavalinnan asetukset</string>
@@ -61,6 +70,12 @@
     <string name="open_dialpad_by_default">Avaa numeronäppäimistö, kun sovellus avataan</string>
     <string name="disable_proximity_sensor">Poista läheisyysanturi käytöstä puheluiden aikana</string>
     <string name="disable_swipe_to_answer">Vastaa puheluihin painalluksella pyyhkäisyn sijaan</string>
+    <string name="show_incoming_calls_full_screen">Näytä saapuvat puhelut aina koko näytöllä</string>
+    <string name="hide_dialpad_numbers">Hide dialpad numbers</string>
+
+    <!-- FAQ -->
+    <string name="faq_1_title">Kuulen saapuvat puhelut, mutta näyttö ei käynnisty. Mitä voin tehdä\?</string>
+    <string name="faq_1_text">Tällaisiin ongelmiin voi olla monia laite- ja järjestelmäkohtaisia syitä, joita on vaikea sanoa yleisesti. Kannattaa tutkia laitteen asetuksia ja varmistaa, että sovelluksen on sallittu ponnahtaa esiin, kun se on taustalla, ja sallia sen näyttäminen muiden sovellusten yläpuolella.</string>
     <!--
         Haven't found some strings? There's more at
         https://github.com/SimpleMobileTools/Simple-Commons/tree/master/commons/src/main/res

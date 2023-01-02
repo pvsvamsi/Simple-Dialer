@@ -20,6 +20,8 @@
     <string name="asterisk">Αστερίσκος</string>
     <string name="hashtag">Ετικέτα</string>
     <string name="call_number">Αριθμός κλήσης</string>
+    <string name="dialpad_beeps">Ενεργοποίηση ήχου στα αγγίγματα των κουμπιών του πληκτρολογίου κλήσης</string>
+    <string name="dialpad_vibrations">Ενεργοποίηση δονήσεων στα αγγίγματα των κουμπιών του πληκτρολογίου κλήσης</string>
     <!-- Dialer -->
     <string name="dialer">Κλήση</string>
     <string name="accept">Αποδοχή</string>
@@ -52,15 +54,28 @@
     <string name="call_add">Προσθήκη κλήσης</string>
     <string name="conference_manage">Διαχείριση Συνδιάσκεψης</string>
     <string name="conference">Συνδιάσκεψη</string>
+    <string name="audio_route_speaker">Ηχείο</string>
+    <string name="audio_route_earpiece">Ακουστικα</string>
+    <string name="audio_route_bluetooth">Bluetooth</string>
+    <string name="audio_route_wired_headset">Ενσύρματα κεφαλής</string>
+    <string name="audio_route_wired_or_earpiece">Ενσύρματα ή ακουστικά</string>
+    <string name="choose_audio_route">Επιλογή διαδρομής ήχου</string>
+    <string name="calling_blocked_number">The number you are calling is blocked</string>
     <!-- Speed dial -->
     <string name="speed_dial">Ταχεία κλήση</string>
     <string name="manage_speed_dial">Διαχείριση ταχείας κλήσης</string>
     <string name="speed_dial_label">Κάντε κλικ σε έναν αριθμό για να αντιστοιχίσετε μια επαφή σε αυτόν. Στη συνέχεια, μπορείτε να καλέσετε γρήγορα τη δεδομένη επαφή πατώντας τον αριθμό αυτόν.</string>
     <!-- Settings -->
     <string name="group_subsequent_calls">Ομαδοποίηση των επόμενων κλήσεων του ίδιου αριθμού στο αρχείο καταγραφής κλήσεων</string>
-    <string name="open_dialpad_by_default">Ανοίξτε το πληκτρολόγιο από προεπιλογή όταν ανοίγει η εφαρμογή</string>
+    <string name="open_dialpad_by_default">Άνοιγμα του πληκτρολογίου από προεπιλογή όταν ανοίγει η εφαρμογή</string>
     <string name="disable_proximity_sensor">Απενεργοποίηση του αισθητήρα εγγύτητας κατά τη διάρκεια κλήσεων</string>
     <string name="disable_swipe_to_answer">Αντικατάσταση Σάρωσης με Κλικ στην απάντηση εισερχόμενων κλήσεων</string>
+    <string name="show_incoming_calls_full_screen">Να εμφανίζονται πάντα οι εισερχόμενες κλήσεις σε πλήρη οθόνη</string>
+    <string name="hide_dialpad_numbers">Hide dialpad numbers</string>
+
+    <!-- FAQ -->
+    <string name="faq_1_title">Ακούω εισερχόμενες κλήσεις, αλλά η οθόνη δεν ανάβει. Τι μπορώ να κάνω;</string>
+    <string name="faq_1_text">Τέτοια θέματα μπορεί να έχουν πολλούς λόγους που σχετίζονται με τη συσκευή και το σύστημα, και είναι δύσκολο να ειπωθούν γενικά. Θα πρέπει να ψάξετε στις ρυθμίσεις της συσκευής σας και να βεβαιωθείτε ότι η εφαρμογή επιτρέπεται να εμφανίζεται όταν βρίσκεται στο παρασκήνιο και να επιτρέπει την εμφάνισή της πάνω από άλλες εφαρμογές.</string>
     <!--
         Haven't found some strings? There's more at
         https://github.com/SimpleMobileTools/Simple-Commons/tree/master/commons/src/main/res

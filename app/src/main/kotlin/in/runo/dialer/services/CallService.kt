@@ -1,17 +1,17 @@
 package `in`.runo.dialer.services
 
 import android.app.KeyguardManager
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.telecom.Call
+import android.telecom.CallAudioState
 import android.telecom.InCallService
 import `in`.runo.dialer.activities.CallActivity
-import `in`.runo.dialer.extensions.getStateCompat
 import `in`.runo.dialer.extensions.isOutgoing
 import `in`.runo.dialer.extensions.powerManager
 import `in`.runo.dialer.helpers.CallManager
 import `in`.runo.dialer.helpers.CallNotificationManager
 import `in`.runo.dialer.helpers.NoCall
+import `in`.runo.dialer.extensions.config
 
 class CallService : InCallService() {
     private val callNotificationManager by lazy { CallNotificationManager(this) }
@@ -19,7 +19,9 @@ class CallService : InCallService() {
     private val callListener = object : Call.Callback() {
         override fun onStateChanged(call: Call, state: Int) {
             super.onStateChanged(call, state)
-            if (state != Call.STATE_DISCONNECTED) {
+            if (state == Call.STATE_DISCONNECTED || state == Call.STATE_DISCONNECTING) {
+                callNotificationManager.cancelNotification()
+            } else {
                 callNotificationManager.setupNotification()
             }
         }
@@ -32,14 +34,12 @@ class CallService : InCallService() {
         call.registerCallback(callListener)
 
         val isScreenLocked = (getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager).isDeviceLocked
-        if (!powerManager.isInteractive || call.isOutgoing() || isScreenLocked) {
+        if (!powerManager.isInteractive || call.isOutgoing() || isScreenLocked || config.alwaysShowFullscreen) {
             try {
+                callNotificationManager.setupNotification(true)
                 startActivity(CallActivity.getStartIntent(this))
-                if (call.getStateCompat() != Call.STATE_RINGING) {
-                    callNotificationManager.setupNotification()
-                }
-            } catch (e: ActivityNotFoundException) {
-                // seems like startActivity can thrown AndroidRuntimeException and ActivityNotFoundException, not yet sure when and why, lets show a notification
+            } catch (e: Exception) {
+                // seems like startActivity can throw AndroidRuntimeException and ActivityNotFoundException, not yet sure when and why, lets show a notification
                 callNotificationManager.setupNotification()
             }
         } else {
@@ -60,6 +60,13 @@ class CallService : InCallService() {
             if (wasPrimaryCall) {
                 startActivity(CallActivity.getStartIntent(this))
             }
+        }
+    }
+
+    override fun onCallAudioStateChanged(audioState: CallAudioState?) {
+        super.onCallAudioStateChanged(audioState)
+        if (audioState != null) {
+            CallManager.onAudioStateChanged(audioState)
         }
     }
 

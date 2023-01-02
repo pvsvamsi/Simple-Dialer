@@ -1,8 +1,8 @@
 package `in`.runo.dialer.activities
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.SearchManager
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ShortcutInfo
@@ -12,12 +12,12 @@ import android.graphics.drawable.Icon
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.os.Handler
-import android.provider.CallLog
 import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuItemCompat
 import androidx.viewpager.widget.ViewPager
@@ -47,15 +47,19 @@ import me.grantland.widget.AutofitHelper
 class MainActivity : SimpleActivity() {
     private var isSearchOpen = false
     private var launchedDialer = false
-    private var searchMenuItem: MenuItem? = null
+    private var mSearchMenuItem: MenuItem? = null
     private var storedShowTabs = 0
     private var searchQuery = ""
     var cachedContacts = ArrayList<SimpleContact>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        isMaterialActivity = true
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         appLaunched(BuildConfig.APPLICATION_ID)
+        setupOptionsMenu()
+        refreshMenuItems()
+        updateMaterialActivityViews(main_coordinator, main_holder, false)
 
         launchedDialer = savedInstanceState?.getBoolean(OPEN_DIAL_PAD_AT_LAUNCH) ?: false
 
@@ -73,28 +77,38 @@ class MainActivity : SimpleActivity() {
                 snackbar.setActionTextColor(getProperTextColor())
                 snackbar.show()
             }
+
+            handleNotificationPermission { granted ->
+                if (!granted) {
+                    toast(R.string.no_post_notifications_permissions)
+                }
+            }
         } else {
             launchSetDefaultDialerIntent()
+        }
+
+        if (isQPlus() && config.blockUnknownNumbers) {
+            setDefaultCallerIdApp()
         }
 
         setupTabs()
         SimpleContact.sorting = config.sorting
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean(OPEN_DIAL_PAD_AT_LAUNCH, launchedDialer)
-    }
-
     override fun onResume() {
         super.onResume()
-        val properPrimaryColor = getProperPrimaryColor()
-        val dialpadIcon = resources.getColoredDrawableWithColor(R.drawable.ic_dialpad_vector, properPrimaryColor.getContrastColor())
-        main_dialpad_button.apply {
-            setImageDrawable(dialpadIcon)
-            background.applyColorFilter(properPrimaryColor)
+        val statusBarColor = if (getCurrentFragment()?.getScrollingView() == null) {
+            getProperBackgroundColor()
+        } else {
+            window.statusBarColor
         }
 
+        val properPrimaryColor = getProperPrimaryColor()
+        val dialpadIcon = resources.getColoredDrawableWithColor(R.drawable.ic_dialpad_vector, properPrimaryColor.getContrastColor())
+        main_dialpad_button.setImageDrawable(dialpadIcon)
+
+        setupToolbar(main_toolbar, statusBarColor = statusBarColor, searchMenuItem = mSearchMenuItem)
+        updateTextColors(main_holder)
         setupTabColors()
 
         getAllFragments().forEach {
@@ -121,42 +135,59 @@ class MainActivity : SimpleActivity() {
         config.lastUsedViewPagerPage = view_pager.currentItem
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu, menu)
-        menu.apply {
-            findItem(R.id.clear_call_history).isVisible = getCurrentFragment() == recents_fragment
-            findItem(R.id.sort).isVisible = getCurrentFragment() != recents_fragment
-            findItem(R.id.create_new_contact).isVisible = getCurrentFragment() == contacts_fragment
-
-            setupSearch(this)
-            updateMenuItemColors(this)
-        }
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.clear_call_history -> clearCallHistory()
-            R.id.create_new_contact -> launchCreateNewContactIntent()
-            R.id.sort -> showSortingDialog(showCustomSorting = getCurrentFragment() is FavoritesFragment)
-            R.id.settings -> launchSettings()
-            R.id.about -> launchAbout()
-            else -> return super.onOptionsItemSelected(item)
-        }
-        return true
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
         super.onActivityResult(requestCode, resultCode, resultData)
-        // we dont really care about the result, the app can work without being the default Dialer too
+        // we don't really care about the result, the app can work without being the default Dialer too
         if (requestCode == REQUEST_CODE_SET_DEFAULT_DIALER) {
             checkContactPermissions()
+        } else if (requestCode == REQUEST_CODE_SET_DEFAULT_CALLER_ID && resultCode != Activity.RESULT_OK) {
+            toast(R.string.must_make_default_caller_id_app, length = Toast.LENGTH_LONG)
+            baseConfig.blockUnknownNumbers = false
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(OPEN_DIAL_PAD_AT_LAUNCH, launchedDialer)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         refreshItems()
+    }
+
+    override fun onBackPressed() {
+        if (isSearchOpen && mSearchMenuItem != null) {
+            mSearchMenuItem!!.collapseActionView()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    private fun refreshMenuItems() {
+        val currentFragment = getCurrentFragment()
+        main_toolbar.menu.apply {
+            findItem(R.id.clear_call_history).isVisible = currentFragment == recents_fragment
+            findItem(R.id.sort).isVisible = currentFragment != recents_fragment
+            findItem(R.id.create_new_contact).isVisible = currentFragment == contacts_fragment
+            findItem(R.id.more_apps_from_us).isVisible = !resources.getBoolean(R.bool.hide_google_relations)
+        }
+    }
+
+    private fun setupOptionsMenu() {
+        setupSearch(main_toolbar.menu)
+        main_toolbar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.clear_call_history -> clearCallHistory()
+                R.id.create_new_contact -> launchCreateNewContactIntent()
+                R.id.sort -> showSortingDialog(showCustomSorting = getCurrentFragment() is FavoritesFragment)
+                R.id.more_apps_from_us -> launchMoreAppsFromUsIntent()
+                R.id.settings -> launchSettings()
+                R.id.about -> launchAbout()
+                else -> return@setOnMenuItemClickListener false
+            }
+            return@setOnMenuItemClickListener true
+        }
     }
 
     private fun checkContactPermissions() {
@@ -167,8 +198,8 @@ class MainActivity : SimpleActivity() {
 
     private fun setupSearch(menu: Menu) {
         val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
-        searchMenuItem = menu.findItem(R.id.search)
-        (searchMenuItem!!.actionView as SearchView).apply {
+        mSearchMenuItem = menu.findItem(R.id.search)
+        (mSearchMenuItem!!.actionView as SearchView).apply {
             setSearchableInfo(searchManager.getSearchableInfo(componentName))
             isSubmitButtonEnabled = false
             queryHint = getString(R.string.search)
@@ -185,7 +216,7 @@ class MainActivity : SimpleActivity() {
             })
         }
 
-        MenuItemCompat.setOnActionExpandListener(searchMenuItem, object : MenuItemCompat.OnActionExpandListener {
+        MenuItemCompat.setOnActionExpandListener(mSearchMenuItem, object : MenuItemCompat.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 isSearchOpen = true
                 main_dialpad_button.beGone()
@@ -205,7 +236,8 @@ class MainActivity : SimpleActivity() {
     }
 
     private fun clearCallHistory() {
-        ConfirmationDialog(this, "", R.string.clear_history_confirmation) {
+        val confirmationText = "${getString(R.string.remove_confirmation)}\n\n${getString(R.string.cannot_be_undone)}"
+        ConfirmationDialog(this, confirmationText) {
             RecentsHelper(this).removeAllRecentCalls(this) {
                 runOnUiThread {
                     recents_fragment?.refreshItems()
@@ -245,30 +277,43 @@ class MainActivity : SimpleActivity() {
             .build()
     }
 
+    private fun updateStatusBarChanger() {
+        setupMaterialScrollListener(getCurrentFragment()?.getScrollingView(), main_toolbar)
+        updateStatusBarOnPageChange()
+    }
+
     private fun setupTabColors() {
         val activeView = main_tabs_holder.getTabAt(view_pager.currentItem)?.customView
-        updateBottomTabItemColors(activeView, true)
+        updateBottomTabItemColors(activeView, true, getSelectedTabDrawableIds()[view_pager.currentItem])
 
         getInactiveTabIndexes(view_pager.currentItem).forEach { index ->
             val inactiveView = main_tabs_holder.getTabAt(index)?.customView
-            updateBottomTabItemColors(inactiveView, false)
+            updateBottomTabItemColors(inactiveView, false, getDeselectedTabDrawableIds()[index])
         }
 
-        val bottomBarColor = getBottomTabsBackgroundColor()
+        val bottomBarColor = getBottomNavigationBackgroundColor()
         main_tabs_holder.setBackgroundColor(bottomBarColor)
         updateNavigationBarColor(bottomBarColor)
     }
 
     private fun getInactiveTabIndexes(activeIndex: Int) = (0 until tabsList.size).filter { it != activeIndex }
 
+    private fun getSelectedTabDrawableIds() = arrayOf(
+        R.drawable.ic_person_vector,
+        R.drawable.ic_star_vector,
+        R.drawable.ic_clock_filled_vector
+    )
+
+    private fun getDeselectedTabDrawableIds() = arrayOf(
+        R.drawable.ic_person_outline_vector,
+        R.drawable.ic_star_outline_vector,
+        R.drawable.ic_clock_vector
+    )
+
     private fun initFragments() {
         view_pager.offscreenPageLimit = 2
         view_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
-            override fun onPageScrollStateChanged(state: Int) {
-                if (state == ViewPager.SCROLL_STATE_SETTLING) {
-                    closeSearch()
-                }
-            }
+            override fun onPageScrollStateChanged(state: Int) {}
 
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
 
@@ -277,7 +322,8 @@ class MainActivity : SimpleActivity() {
                 getAllFragments().forEach {
                     it?.finishActMode()
                 }
-                invalidateOptionsMenu()
+                refreshMenuItems()
+                updateStatusBarChanger()
             }
         })
 
@@ -291,17 +337,21 @@ class MainActivity : SimpleActivity() {
                     wantedTab = main_tabs_holder.tabCount - 1
 
                     ensureBackgroundThread {
-                        resetMissedCalls()
+                        clearMissedCalls()
                     }
                 }
 
                 main_tabs_holder.getTabAt(wantedTab)?.select()
-                invalidateOptionsMenu()
+                refreshMenuItems()
             }, 100L)
         }
 
         main_dialpad_button.setOnClickListener {
             launchDialpad()
+        }
+
+        view_pager.onGlobalLayout {
+            refreshMenuItems()
         }
 
         if (config.openDialPadAtLaunch && !launchedDialer) {
@@ -326,16 +376,19 @@ class MainActivity : SimpleActivity() {
 
         main_tabs_holder.onTabSelectionChanged(
             tabUnselectedAction = {
-                updateBottomTabItemColors(it.customView, false)
+                updateBottomTabItemColors(it.customView, false, getDeselectedTabDrawableIds()[it.position])
             },
             tabSelectedAction = {
                 closeSearch()
                 view_pager.currentItem = it.position
-                updateBottomTabItemColors(it.customView, true)
+                updateBottomTabItemColors(it.customView, true, getSelectedTabDrawableIds()[it.position])
             }
         )
 
         main_tabs_holder.beGoneIf(main_tabs_holder.tabCount == 1)
+        main_tabs_holder.onGlobalLayout {
+            updateStatusBarChanger()
+        }
         storedShowTabs = config.showTabs
     }
 
@@ -436,21 +489,14 @@ class MainActivity : SimpleActivity() {
         }
     }
 
-    // clear the missed calls count. Doesn't seem to always work, but having it can't hurt
-    // found at https://android.googlesource.com/platform/packages/apps/Dialer/+/nougat-release/src/com/android/dialer/calllog/MissedCallNotifier.java#181
-    private fun resetMissedCalls() {
-        val values = ContentValues().apply {
-            put(CallLog.Calls.NEW, 0)
-            put(CallLog.Calls.IS_READ, 1)
-        }
-
-        val selection = "${CallLog.Calls.TYPE} = ?"
-        val selectionArgs = arrayOf(CallLog.Calls.MISSED_TYPE.toString())
-
+    @SuppressLint("MissingPermission")
+    private fun clearMissedCalls() {
         try {
-            val uri = CallLog.Calls.CONTENT_URI
-            contentResolver.update(uri, values, selection, selectionArgs)
-        } catch (e: Exception) {
+            // notification cancellation triggers MissedCallNotifier.clearMissedCalls() which, in turn,
+            // should update the database and reset the cached missed call count in MissedCallNotifier.java
+            // https://android.googlesource.com/platform/packages/services/Telecomm/+/master/src/com/android/server/telecom/ui/MissedCallNotifierImpl.java#170
+            telecomManager.cancelMissedCallsNotification()
+        } catch (ignored: Exception) {
         }
     }
 
@@ -465,6 +511,7 @@ class MainActivity : SimpleActivity() {
         val licenses = LICENSE_GLIDE or LICENSE_INDICATOR_FAST_SCROLL or LICENSE_AUTOFITTEXTVIEW
 
         val faqItems = arrayListOf(
+            FAQItem(R.string.faq_1_title, R.string.faq_1_text),
             FAQItem(R.string.faq_9_title_commons, R.string.faq_9_text_commons)
         )
 
@@ -497,7 +544,7 @@ class MainActivity : SimpleActivity() {
             getAllFragments().forEach {
                 it?.onSearchQueryChanged("")
             }
-            searchMenuItem?.collapseActionView()
+            mSearchMenuItem?.collapseActionView()
         }
     }
 

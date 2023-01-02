@@ -20,6 +20,8 @@
     <string name="asterisk">Yıldız işareti</string>
     <string name="hashtag">Kare işareti</string>
     <string name="call_number">Numarayı ara</string>
+    <string name="dialpad_beeps">Tuş takımı düğmelerine tıklandığında bip sesini etkinleştir</string>
+    <string name="dialpad_vibrations">Tuş takımı düğmelerine tıklandığında titreşimi etkinleştir</string>
     <!-- Dialer -->
     <string name="dialer">Çevirici</string>
     <string name="accept">Kabul Et</string>
@@ -52,6 +54,13 @@
     <string name="call_add">Arama ekle</string>
     <string name="conference_manage">Konferans aramasını yönet</string>
     <string name="conference">Konferans</string>
+    <string name="audio_route_speaker">Hoparlör</string>
+    <string name="audio_route_earpiece">Kulaklık</string>
+    <string name="audio_route_bluetooth">Bluetooth</string>
+    <string name="audio_route_wired_headset">Kablolu Kulaklık</string>
+    <string name="audio_route_wired_or_earpiece">Kablolu veya Kulaklık</string>
+    <string name="choose_audio_route">Ses çıkışını seçin</string>
+    <string name="calling_blocked_number">The number you are calling is blocked</string>
     <!-- Speed dial -->
     <string name="speed_dial">Hızlı arama</string>
     <string name="manage_speed_dial">Hızlı aramayı yönet</string>
@@ -61,6 +70,12 @@
     <string name="open_dialpad_by_default">Uygulama açıldığında öntanımlı olarak tuş takımını aç</string>
     <string name="disable_proximity_sensor">Aramalar sırasında yakınlık sensörünü devre dışı bırak</string>
     <string name="disable_swipe_to_answer">Gelen aramalara yanıt vermek için kaydırmayı tıklamayla değiştir</string>
+    <string name="show_incoming_calls_full_screen">Gelen aramaları her zaman tam ekranda görüntüle</string>
+    <string name="hide_dialpad_numbers">Hide dialpad numbers</string>
+
+    <!-- FAQ -->
+    <string name="faq_1_title">Gelen aramaları duyuyorum ama ekran açılmıyor. Ne yapabilirim\?</string>
+    <string name="faq_1_text">Bu tür sorunların aygıta ve sisteme özgü birçok nedeni olabilir, genel olarak söylemek zor. Aygıt ayarlarınıza bakmalı ve uygulamanın arka plandayken açılmasına ve diğer uygulamaların üzerinde görüntülenmesine izin verildiğinden emin olmalısınız.</string>
     <!--
         Bazı dizeleri bulamadınız mı? Burada daha fazlası var:
         https://github.com/SimpleMobileTools/Simple-Commons/tree/master/commons/src/main/res

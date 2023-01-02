@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.telecom.TelecomManager
-import android.view.Menu
 import android.widget.Toast
 import com.simplemobiletools.commons.extensions.*
 import com.simplemobiletools.commons.helpers.REQUEST_CODE_SET_DEFAULT_DIALER
@@ -34,14 +33,15 @@ class DialerActivity : SimpleActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        updateMenuItemColors(menu)
-        return super.onCreateOptionsMenu(menu)
-    }
-
     @SuppressLint("MissingPermission")
     private fun initOutgoingCall() {
         try {
+            if (isNumberBlocked(callNumber.toString().replace("tel:", ""), getBlockedNumbers())) {
+                toast(R.string.calling_blocked_number)
+                finish()
+                return
+            }
+
             getHandleToUse(intent, callNumber.toString()) { handle ->
                 if (handle != null) {
                     Bundle().apply {

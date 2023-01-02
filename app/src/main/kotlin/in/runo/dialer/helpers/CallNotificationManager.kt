@@ -20,18 +20,18 @@ import `in`.runo.dialer.extensions.powerManager
 import `in`.runo.dialer.receivers.CallActionReceiver
 
 class CallNotificationManager(private val context: Context) {
-    private val CALL_NOTIFICATION_ID = 1
+    private val CALL_NOTIFICATION_ID = 42
     private val ACCEPT_CALL_CODE = 0
     private val DECLINE_CALL_CODE = 1
     private val notificationManager = context.notificationManager
     private val callContactAvatarHelper = CallContactAvatarHelper(context)
 
     @SuppressLint("NewApi")
-    fun setupNotification() {
+    fun setupNotification(forceLowPriority: Boolean = false) {
         getCallContact(context.applicationContext, CallManager.getPrimaryCall()) { callContact ->
             val callContactAvatar = callContactAvatarHelper.getCallContactAvatar(callContact)
             val callState = CallManager.getState()
-            val isHighPriority = context.powerManager.isInteractive && callState == Call.STATE_RINGING
+            val isHighPriority = context.powerManager.isInteractive && callState == Call.STATE_RINGING && !forceLowPriority
             val channelId = if (isHighPriority) "simple_dialer_call_high_priority" else "simple_dialer_call"
             if (isOreoPlus()) {
                 val importance = if (isHighPriority) NotificationManager.IMPORTANCE_HIGH else NotificationManager.IMPORTANCE_DEFAULT
@@ -99,7 +99,10 @@ class CallNotificationManager(private val context: Context) {
             }
 
             val notification = builder.build()
-            notificationManager.notify(CALL_NOTIFICATION_ID, notification)
+            // it's rare but possible for the call state to change by now
+            if (CallManager.getState() == callState) {
+                notificationManager.notify(CALL_NOTIFICATION_ID, notification)
+            }
         }
     }
 

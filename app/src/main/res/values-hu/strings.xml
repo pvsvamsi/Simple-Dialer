@@ -3,7 +3,7 @@
     <string name="app_name">Egyszerű tárcsázó</string>
     <string name="app_launcher_name">Tárcsázó</string>
     <string name="default_phone_app_prompt">Tegye az alkalmazást az alapértelmezett Telefon alkalmazássá</string>
-    <string name="allow_displaying_over_other_apps">Please allow displaying over other apps for reliable behaviour</string>
+    <string name="allow_displaying_over_other_apps">A kiszámítható viselkedés érdekében engedélyezze a más alkalmazások feletti megjelenítést</string>
     <!-- Contacts -->
     <string name="could_not_access_contacts">A névjegyei nem érhetők el</string>
     <!-- Recents -->
@@ -20,6 +20,8 @@
     <string name="asterisk">Csillag</string>
     <string name="hashtag">Kettőskereszt</string>
     <string name="call_number">Hívószám</string>
+    <string name="dialpad_beeps">Pittyegés a tárcsázógombokra történő kattintás során</string>
+    <string name="dialpad_vibrations">Rezgés a tárcsázógombokra történő kattintás során</string>
     <!-- Dialer -->
     <string name="dialer">Tárcsázó</string>
     <string name="accept">Fogadás</string>
@@ -43,15 +45,22 @@
     <string name="show_dialpad">Tárcsázó megjelenítése</string>
     <string name="hide_dialpad">Tárcsázó elrejtése</string>
     <string name="end_call">Hívás befejezése</string>
-    <string name="hold_call">Hold call</string>
-    <string name="resume_call">Resume call</string>
-    <string name="call_on_hold">On Hold</string>
-    <string name="call_swap">Swap calls</string>
-    <string name="call_merge">Merge calls</string>
-    <string name="call_split">Split call</string>
-    <string name="call_add">Add call</string>
-    <string name="conference_manage">Manage conference call</string>
-    <string name="conference">Conference</string>
+    <string name="hold_call">Hívás tartásba tétele</string>
+    <string name="resume_call">Hívás folytatása</string>
+    <string name="call_on_hold">Tartásban</string>
+    <string name="call_swap">Híváscsere</string>
+    <string name="call_merge">Hívások egyesítése</string>
+    <string name="call_split">Hívás felosztása</string>
+    <string name="call_add">Hívás hozzáadása</string>
+    <string name="conference_manage">Konferenciahívás kezelése</string>
+    <string name="conference">Konferencia</string>
+    <string name="audio_route_speaker">Speaker</string>
+    <string name="audio_route_earpiece">Earpiece</string>
+    <string name="audio_route_bluetooth">Bluetooth</string>
+    <string name="audio_route_wired_headset">Wired Headset</string>
+    <string name="audio_route_wired_or_earpiece">Wired or Earpiece</string>
+    <string name="choose_audio_route">Choose audio route</string>
+    <string name="calling_blocked_number">The number you are calling is blocked</string>
     <!-- Speed dial -->
     <string name="speed_dial">Gyors tárcsázó</string>
     <string name="manage_speed_dial">Gyors tárcsázó kezelése</string>
@@ -61,6 +70,12 @@
     <string name="open_dialpad_by_default">Tárcsázó alapértelmezett kinyitása az alkalmazás megnyitásakor</string>
     <string name="disable_proximity_sensor">Közelségérzékelő kikapcsolása a hívások során</string>
     <string name="disable_swipe_to_answer">Csúsztatás kattintásra cserélése a bejövő hívásoknál</string>
+    <string name="show_incoming_calls_full_screen">Bejövő hívások megjelenítése mindig teljes képernyőn</string>
+    <string name="hide_dialpad_numbers">Hide dialpad numbers</string>
+
+    <!-- FAQ -->
+    <string name="faq_1_title">Bejövő hívást hallok, de a képernyő nem kapcsol be. Mit tehetek\?</string>
+    <string name="faq_1_text">Az ilyen problémáknak számos eszköz- és rendszerfüggő oka lehet, általánosságban nehéz megmondani. Nézzen körül az eszközbeállításokban, és győződjön meg róla, hogy az alkalmazás előbújhat-e a háttérből, és megjelenhet-e más alkalmazások felett.</string>
     <!--
         Haven't found some strings? There's more at
         https://github.com/SimpleMobileTools/Simple-Commons/tree/master/commons/src/main/res

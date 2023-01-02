@@ -20,6 +20,8 @@
     <string name="asterisk">Asterisc</string>
     <string name="hashtag">Etiqueta</string>
     <string name="call_number">Número de trucada</string>
+    <string name="dialpad_beeps">Activa els sons en fer clic als botons del teclat de marcatge</string>
+    <string name="dialpad_vibrations">Activa les vibracions en fer clic als botons del teclat de marcatge</string>
     <!-- Dialer -->
     <string name="dialer">Marcador</string>
     <string name="accept">Accepta</string>
@@ -52,6 +54,13 @@
     <string name="call_add">Afegeix una trucada</string>
     <string name="conference_manage">Gestiona una trucada de conferència</string>
     <string name="conference">Conferència</string>
+    <string name="audio_route_speaker">Altaveu</string>
+    <string name="audio_route_earpiece">Auricular</string>
+    <string name="audio_route_bluetooth">Bluetooth</string>
+    <string name="audio_route_wired_headset">Auriculars amb cable</string>
+    <string name="audio_route_wired_or_earpiece">Amb cable o auricular</string>
+    <string name="choose_audio_route">Trieu la sortida d\'àudio</string>
+    <string name="calling_blocked_number">The number you are calling is blocked</string>
     <!-- Speed dial -->
     <string name="speed_dial">Marcatge ràpid</string>
     <string name="manage_speed_dial">Gestiona el marcatge ràpid</string>
@@ -61,6 +70,12 @@
     <string name="open_dialpad_by_default">Obre el teclat de marcatge de manera predeterminada quan s\'obri l\'aplicació</string>
     <string name="disable_proximity_sensor">Desactiva el sensor de proximitat durant les trucades</string>
     <string name="disable_swipe_to_answer">Substitueix el lliscament en respondre a les trucades entrants per fer clic</string>
+    <string name="show_incoming_calls_full_screen">Mostra sempre les trucades entrants a pantalla completa</string>
+    <string name="hide_dialpad_numbers">Hide dialpad numbers</string>
+
+    <!-- FAQ -->
+    <string name="faq_1_title">Sento trucades entrants, però la pantalla no s\'encén. Què puc fer\?</string>
+    <string name="faq_1_text">Aquests problemes poden tenir moltes raons específiques del dispositiu i del sistema, difícils de dir en general. Hauríeu de mirar per la configuració del dispositiu i assegurar-vos que l\'aplicació pugui aparèixer en segon pla i permetre que es mostri sobre altres aplicacions.</string>
     <!--
         Haven't found some strings? There's more at
         https://github.com/SimpleMobileTools/Simple-Commons/tree/master/commons/src/main/res

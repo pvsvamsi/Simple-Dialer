@@ -1,12 +1,17 @@
 package `in`.runo.dialer.helpers
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.os.Handler
 import android.telecom.Call
+import android.telecom.CallAudioState
 import android.telecom.InCallService
 import android.telecom.VideoProfile
 import `in`.runo.dialer.extensions.getStateCompat
 import `in`.runo.dialer.extensions.hasCapability
 import `in`.runo.dialer.extensions.isConference
+import `in`.runo.dialer.extensions.config
+import `in`.runo.dialer.models.AudioRoute
 import java.util.concurrent.CopyOnWriteArraySet
 
 // inspired by https://github.com/Chooloo/call_manage
@@ -42,6 +47,13 @@ class CallManager {
         fun onCallRemoved(call: Call) {
             calls.remove(call)
             updateState()
+        }
+
+        fun onAudioStateChanged(audioState: CallAudioState) {
+            val route = AudioRoute.fromRoute(audioState.route) ?: return
+            for (listener in listeners) {
+                listener.onAudioStateChanged(route)
+            }
         }
 
         fun getPhoneState(): PhoneState {
@@ -85,6 +97,25 @@ class CallManager {
             }
         }
 
+        private fun getCallAudioState() = inCallService?.callAudioState
+
+        fun getSupportedAudioRoutes(): Array<AudioRoute> {
+            return AudioRoute.values().filter {
+                val supportedRouteMask = getCallAudioState()?.supportedRouteMask
+                if (supportedRouteMask != null) {
+                    supportedRouteMask and it.route == it.route
+                } else {
+                    false
+                }
+            }.toTypedArray()
+        }
+
+        fun getCallAudioRoute() = AudioRoute.fromRoute(getCallAudioState()?.route)
+
+        fun setAudioRoute(newRoute: Int) {
+            inCallService?.setAudioRoute(newRoute)
+        }
+
         private fun updateState() {
             val primaryCall = when (val phoneState = getPhoneState()) {
                 is NoCall -> null
@@ -106,6 +137,9 @@ class CallManager {
                     listener.onStateChanged()
                 }
             }
+
+            // remove all disconnected calls manually in case they are still here
+            calls.removeAll { it.getStateCompat() == Call.STATE_DISCONNECTED }
         }
 
         fun getPrimaryCall(): Call? {
@@ -167,9 +201,15 @@ class CallManager {
 
         fun getState() = getPrimaryCall()?.getStateCompat()
 
-        fun keypad(c: Char) {
-            call?.playDtmfTone(c)
-            call?.stopDtmfTone()
+        fun keypad(context: Context, char: Char) {
+            call?.playDtmfTone(char)
+            if (context.config.dialpadBeeps) {
+                Handler().postDelayed({
+                    call?.stopDtmfTone()
+                }, DIALPAD_TONE_LENGTH_MS)
+            } else {
+                call?.stopDtmfTone()
+            }
         }
 
         fun isSingleCall(): Boolean {
@@ -184,6 +224,7 @@ class CallManager {
 
 interface CallManagerListener {
     fun onStateChanged()
+    fun onAudioStateChanged(audioState: AudioRoute)
     fun onPrimaryCallChanged(call: Call)
 }
 

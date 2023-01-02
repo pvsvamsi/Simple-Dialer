@@ -9,14 +9,14 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "in.runo.dialer"
         minSdkVersion 23
-        targetSdkVersion 31
-        versionCode 39
-        versionName "5.13.3"
+        targetSdkVersion 33
+        versionCode 47
+        versionName "5.17.0"
         setProperty("archivesBaseName", "dialer")
     }
 
@@ -62,7 +62,7 @@ android {
 }
 
 dependencies {
-    implementation 'com.github.SimpleMobileTools:Simple-Commons:e79c9bba93'
+    implementation 'com.github.SimpleMobileTools:Simple-Commons:7e489f7121'
     implementation 'com.github.tibbi:IndicatorFastScroll:4524cd0b61'
     implementation 'me.grantland:autofittextview:0.2.1'
 }

@@ -1,6 +1,61 @@
 Changelog
 ==========
 
+Version 5.17.0 *(2022-12-30)*
+----------------------------
+
+ * Do not allow calling blocked numbers
+ * Allow hiding numbers on the dialpad
+ * Use Material You theme by default on Android 12+
+ * Added some UI, translation and stability improvements
+
+Version 5.16.0 *(2022-11-12)*
+----------------------------
+
+ * Allow changing the audio route during calls
+ * Require Simple Thank You for some features
+ * Added some stability, translation and UX improvements
+
+Version 5.15.5 *(2022-10-25)*
+----------------------------
+
+ * Fixed a glitch with call notification getting stuck
+ * Added some translation and UX improvements
+
+Version 5.15.4 *(2022-10-06)*
+----------------------------
+
+ * Adding a Get Simple Phone button into the About section
+ * Added some translation and UX improvements
+
+Version 5.15.1 *(2022-09-14)*
+----------------------------
+
+ * Allow blocking numbers by patterns
+ * Properly clear missed calls count
+ * Added some stability and translation improvements
+
+Version 5.15.0 *(2022-09-02)*
+----------------------------
+
+ * Allow toggling beeps and vibrations at the dial pad
+ * Allow pasting numbers at the dialpad
+ * Allow always displaying incoming calls on fullscreen
+ * Added Monochrome icon and Language picker support on Android 13+
+ * Added some translation, stability and UX improvements
+
+Version 5.14.1 *(2022-08-11)*
+----------------------------
+
+ * Fixed some glitches with incoming call screen and notification disappearing
+ * Added some stability, translation and UX improvements
+
+Version 5.14.0 *(2022-07-31)*
+----------------------------
+
+ * Adding some materialish elements, especially in System default theme
+ * Added some stability, translation and UX improvements
+
 Version 5.13.3 *(2022-06-26)*
 ----------------------------
 
