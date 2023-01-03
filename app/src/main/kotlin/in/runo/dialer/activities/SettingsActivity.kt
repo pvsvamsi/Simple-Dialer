@@ -34,7 +34,7 @@ class SettingsActivity : SimpleActivity() {
         super.onResume()
         setupToolbar(settings_toolbar, NavigationIcon.Arrow)
 
-        //setupPurchaseThankYou()
+        setupPurchaseThankYou()
         setupCustomizeColors()
         setupUseEnglish()
         setupLanguage()

@@ -62,8 +62,8 @@ android {
 }
 
 dependencies {
-    //implementation 'com.github.pvsvamsi:Simple-Commons:v1.0.3'
-    implementation 'com.github.SimpleMobileTools:Simple-Commons:7e489f7121'
+    implementation 'com.github.pvsvamsi:Simple-Commons:f8d669d'
+    //implementation 'com.github.SimpleMobileTools:Simple-Commons:7e489f7121'
     implementation 'com.github.tibbi:IndicatorFastScroll:4524cd0b61'
     implementation 'me.grantland:autofittextview:0.2.1'
 }
