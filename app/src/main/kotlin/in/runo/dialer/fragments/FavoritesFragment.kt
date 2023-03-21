@@ -17,6 +17,7 @@ import `in`.runo.dialer.R
 import `in`.runo.dialer.activities.SimpleActivity
 import `in`.runo.dialer.adapters.ContactsAdapter
 import `in`.runo.dialer.extensions.config
+import `in`.runo.dialer.extensions.launchCallIntentWrapper
 import `in`.runo.dialer.helpers.Converters
 import `in`.runo.dialer.interfaces.RefreshItemsListener
 import kotlinx.android.synthetic.main.fragment_letters_layout.view.*
@@ -142,11 +143,11 @@ class FavoritesFragment(context: Context, attributeSet: AttributeSet) : MyViewPa
     private fun callContact(simpleContact: SimpleContact) {
         val phoneNumbers = simpleContact.phoneNumbers
         if (phoneNumbers.size <= 1) {
-            activity?.launchCallIntent(phoneNumbers.first().normalizedNumber)
+            activity?.launchCallIntentWrapper(phoneNumbers.first().normalizedNumber)
         } else {
             val primaryNumber = simpleContact.phoneNumbers.find { it.isPrimary }
             if (primaryNumber != null) {
-                activity?.launchCallIntent(primaryNumber.value)
+                activity?.launchCallIntentWrapper(primaryNumber.value)
             } else {
                 val items = ArrayList<RadioItem>()
                 phoneNumbers.forEachIndexed { index, phoneNumber ->
@@ -155,7 +156,7 @@ class FavoritesFragment(context: Context, attributeSet: AttributeSet) : MyViewPa
                 }
 
                 RadioGroupDialog(activity!!, items) {
-                    activity?.launchCallIntent(it as String)
+                    activity?.launchCallIntentWrapper(it as String)
                 }
             }
         }

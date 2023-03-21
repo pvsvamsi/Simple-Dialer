@@ -1,13 +1,13 @@
 package `in`.runo.dialer.extensions
 
 import android.telecom.Call
-import android.telecom.Call.STATE_CONNECTING
-import android.telecom.Call.STATE_DIALING
-import android.telecom.Call.STATE_SELECT_PHONE_ACCOUNT
+import android.telecom.Call.*
+import android.util.Log
 import com.simplemobiletools.commons.helpers.isQPlus
 import com.simplemobiletools.commons.helpers.isSPlus
 
 private val OUTGOING_CALL_STATES = arrayOf(STATE_CONNECTING, STATE_DIALING, STATE_SELECT_PHONE_ACCOUNT)
+private val INCOMING_CALL_STATES = arrayOf(STATE_RINGING)
 
 @Suppress("DEPRECATION")
 fun Call?.getStateCompat(): Int {
@@ -32,9 +32,21 @@ fun Call?.getCallDuration(): Int {
 
 fun Call.isOutgoing(): Boolean {
     return if (isQPlus()) {
+        Log.d("CallActivityPCC", "OG : details.callDirection ${details.callDirection}")
         details.callDirection == Call.Details.DIRECTION_OUTGOING
     } else {
+        Log.d("CallActivityPCC", "OG : getStateCompat() ${getStateCompat()}")
         OUTGOING_CALL_STATES.contains(getStateCompat())
+    }
+}
+
+fun Call.isIncoming(): Boolean {
+    return if (isQPlus()) {
+        Log.d("CallActivityPCC", "IC : details.callDirection ${details.callDirection}")
+        details.callDirection == Call.Details.DIRECTION_INCOMING
+    } else {
+        Log.d("CallActivityPCC", "IC : getStateCompat() ${getStateCompat()}")
+        INCOMING_CALL_STATES.contains(getStateCompat())
     }
 }
 

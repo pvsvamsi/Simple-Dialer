@@ -1,5 +1,11 @@
 package `in`.runo.dialer.activities
 
+import `in`.runo.dialer.R
+import `in`.runo.dialer.dialogs.DynamicBottomSheetChooserDialog
+import `in`.runo.dialer.extensions.*
+import `in`.runo.dialer.helpers.*
+import `in`.runo.dialer.models.AudioRoute
+import `in`.runo.dialer.models.CallContact
 import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.content.Context
@@ -30,12 +36,6 @@ import com.simplemobiletools.commons.helpers.MINUTE_SECONDS
 import com.simplemobiletools.commons.helpers.isOreoMr1Plus
 import com.simplemobiletools.commons.helpers.isOreoPlus
 import com.simplemobiletools.commons.models.SimpleListItem
-import `in`.runo.dialer.R
-import `in`.runo.dialer.extensions.*
-import `in`.runo.dialer.helpers.*
-import `in`.runo.dialer.models.CallContact
-import `in`.runo.dialer.dialogs.DynamicBottomSheetChooserDialog
-import `in`.runo.dialer.models.AudioRoute
 import kotlinx.android.synthetic.main.activity_call.*
 import kotlinx.android.synthetic.main.dialpad.*
 import kotlin.math.max
@@ -66,7 +66,7 @@ class CallActivity : SimpleActivity() {
 
     private var audioRouteChooserDialog: DynamicBottomSheetChooserDialog? = null
 
-    private var conferenceCallNumber = "-1"
+    private var runoConferenceCallNumber = "-1"
     private var trackingSimSlot = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,7 +87,7 @@ class CallActivity : SimpleActivity() {
         addLockScreenFlags()
         CallManager.addListener(callCallback)
         updateCallContactInfo(CallManager.getPrimaryCall())
-        conferenceCallNumber = config.getConferenceNumber().toString();
+        runoConferenceCallNumber = config.getRunoConferenceNumber().toString();
         trackingSimSlot = config.getTrackingSimSlot();
     }
 
@@ -101,12 +101,12 @@ class CallActivity : SimpleActivity() {
     }
 
     private fun setConfigData(extras: Bundle) {
-        conferenceCallNumber = extras.getString(INTENT_EXTRA_CONFERENCE_NUMBER, "-1");
-        config.setConferenceNumber(conferenceCallNumber);
+        runoConferenceCallNumber = extras.getString(INTENT_EXTRA_CONFERENCE_NUMBER, "-1");
+        config.setRunoConferenceNumber(runoConferenceCallNumber);
         trackingSimSlot = extras.getInt(INTENT_EXTRA_TRACKING_SIM_SLOT, -1);
         config.setTrackingSimSlot(trackingSimSlot);
-        Log.d("CallActivity", conferenceCallNumber);
-        Log.d("CallActivity", trackingSimSlot.toString());
+        Log.d("CallActivityPC", runoConferenceCallNumber);
+        Log.d("CallActivityPC", trackingSimSlot.toString());
     }
 
     override fun onResume() {
@@ -615,25 +615,6 @@ class CallActivity : SimpleActivity() {
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private fun getCallSimCardSlot(): Int {
-        var slot = -2
-        try {
-            val accounts = telecomManager.callCapablePhoneAccounts
-            if (accounts.size > 1) {
-                accounts.forEachIndexed { index, account ->
-                    if (account == CallManager.getPrimaryCall()?.details?.accountHandle) {
-                        slot = index + 1;
-                    }
-                }
-            } else {
-                slot = 1;
-            }
-        } catch (ignored: Exception) {
-        }
-        return slot;
-    }
-
     private fun updateCallState(call: Call) {
         val state = call.getStateCompat()
         when (state) {
@@ -713,12 +694,19 @@ class CallActivity : SimpleActivity() {
         enableProximitySensor()
         incoming_call_holder.beGone()
         ongoing_call_holder.beVisible()
-        if (trackingSimSlot != -1 && conferenceCallNumber != "-1" && getCallSimCardSlot() == trackingSimSlot) {
-            val callNumber = Uri.decode(call.details.handle.toString()).substringAfter("tel:")
-            if (CallManager.isSingleCall() && callNumber != conferenceCallNumber) {
-                callContactWithSimSlot(conferenceCallNumber, trackingSimSlot - 1);
+        //Log.d("CallActivityPC", "Simcard slot " + getCallSimCardSlot())
+        /*val actualDialNumberInConfMode = CallManager.actualDialNumberInConfMode
+        Log.d("CallActivityPC", "actualDialNumberInConfMode $actualDialNumberInConfMode")
+        val callNumber = Uri.decode(call.details.handle.toString()).substringAfter("tel:")
+        if (trackingSimSlot != -1 && actualDialNumberInConfMode != "-1" && getCallSimCardSlot() == trackingSimSlot) {
+            if (CallManager.isSingleCall() && callNumber != actualDialNumberInConfMode) {
+                callContactWithSimSlot(actualDialNumberInConfMode, trackingSimSlot - 1);
             }
-        }
+        }*/
+        /*if(callNumber == actualDialNumberInConfMode || callNumber != runoConferenceCallNumber){
+            Log.d("CallActivityPC", "Resetting conference number is $actualDialNumberInConfMode callNumber is $callNumber")
+            config.setactualDialNumberInConfMode("-1");
+        }*/
     }
 
     private fun callRinging() {
@@ -731,13 +719,59 @@ class CallActivity : SimpleActivity() {
         ongoing_call_holder.beVisible()
         callDurationHandler.removeCallbacks(updateCallDurationTask)
         callDurationHandler.post(updateCallDurationTask)
-        if (trackingSimSlot != -1 && conferenceCallNumber != "-1" && call.isOutgoing() && getCallSimCardSlot() == trackingSimSlot) {
-            val isDualCall = CallManager.isDualCall();
+        val actualDialNumberInConfMode = CallManager.actualDialNumberInRunoConfMode
+        if (call.details?.handle?.toString() != null) {
             val callNumber = Uri.decode(call.details.handle.toString()).substringAfter("tel:")
-            Log.i("CallActivity", "Call started $callNumber")
-            if (isDualCall && callNumber == conferenceCallNumber) {
-                CallManager.merge();
+            Log.d(
+                "CallActivityPC",
+                "Call started $runoConferenceCallNumber $callNumber $actualDialNumberInConfMode ${call.isOutgoing()} ${call.isIncoming()} ${getCallSimCardSlot()} $trackingSimSlot"
+            )
+            if(call.isOutgoing()){
+                if(CallManager.isInRunoConfMode){
+                    val isDualCall = CallManager.isDualCall()
+                    if(isDualCall){
+                        if (callNumber == actualDialNumberInConfMode || callNumber == runoConferenceCallNumber) {
+                            if (CallManager.merge()) {
+                                Log.d("CallActivityPC", "Resetting conference number is $actualDialNumberInConfMode callNumber is $callNumber")
+                                CallManager.resetConferenceMode()
+                            }
+                        } else {
+                            Log.d("CallActivityPC", "Single Call")
+                            Log.d("CallActivityPC", "Resetting conference number is $actualDialNumberInConfMode callNumber is $callNumber")
+                            CallManager.resetConferenceMode()
+                        }
+                    }else {
+                        if(callNumber != actualDialNumberInConfMode) {
+                            callContactWithSimSlot(actualDialNumberInConfMode, trackingSimSlot - 1);
+                        }
+                    }
+                }
+            }else if(call.isIncoming()){
+                val isSingleCall = CallManager.isSingleCall()
+                if(isSingleCall){
+                    if(!CallManager.isInRunoConfMode){
+                        if (trackingSimSlot != -1 && getCallSimCardSlot() == trackingSimSlot) {
+                            if (CallManager.isSingleCall() && callNumber != actualDialNumberInConfMode) {
+                                CallManager.isInRunoConfMode = true;
+                                callContactWithSimSlot(runoConferenceCallNumber, trackingSimSlot - 1);
+                            }
+                        }
+                    }
+                }
             }
+            /*if (CallManager.isInConfMode && call.isOutgoing() && callNumber == actualDialNumberInConfMode) {
+                val isDualCall = CallManager.isDualCall()
+                if (isDualCall) {
+                    if (CallManager.merge()) {
+                        Log.d("CallActivityPC", "Resetting conference number is $actualDialNumberInConfMode callNumber is $callNumber")
+                        CallManager.resetConferenceMode()
+                    }
+                } else {
+                    Log.d("CallActivityPC", "Single Call")
+                    Log.d("CallActivityPC", "Resetting conference number is $actualDialNumberInConfMode callNumber is $callNumber")
+                    CallManager.resetConferenceMode()
+                }
+            }*/
         }
     }
 

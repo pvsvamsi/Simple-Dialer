@@ -1,27 +1,32 @@
 package `in`.runo.dialer.extensions
 
+import `in`.runo.dialer.activities.SimpleActivity
+import `in`.runo.dialer.dialogs.SelectSIMDialog
+import `in`.runo.dialer.helpers.CallManager
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.ContactsContract
 import android.telecom.PhoneAccount
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
+import android.util.Log
+import androidx.core.app.ActivityCompat
 import com.simplemobiletools.commons.activities.BaseSimpleActivity
 import com.simplemobiletools.commons.extensions.*
 import com.simplemobiletools.commons.helpers.*
 import com.simplemobiletools.commons.models.SimpleContact
-import `in`.runo.dialer.activities.SimpleActivity
-import `in`.runo.dialer.dialogs.SelectSIMDialog
 
 fun SimpleActivity.startCallIntent(recipient: String) {
     if (isDefaultDialer()) {
         getHandleToUse(null, recipient) { handle ->
-            launchCallIntent(recipient, handle)
+            launchCallIntentWrapper(recipient, handle)
         }
     } else {
-        launchCallIntent(recipient, null)
+        launchCallIntentWrapper(recipient, null)
     }
 }
 
@@ -37,7 +42,7 @@ fun BaseSimpleActivity.callContactWithSim(recipient: String, useMainSIM: Boolean
     handlePermission(PERMISSION_READ_PHONE_STATE) {
         val wantedSimIndex = if (useMainSIM) 0 else 1
         val handle = getAvailableSIMCardLabels().sortedBy { it.id }.getOrNull(wantedSimIndex)?.handle
-        launchCallIntent(recipient, handle)
+        launchCallIntentWrapper(recipient, handle)
     }
 }
 
@@ -45,7 +50,7 @@ fun BaseSimpleActivity.callContactWithSimSlot(recipient: String, slot: Int) {
     handlePermission(PERMISSION_READ_PHONE_STATE) {
         val wantedSimIndex = if (slot > 0) 0 else slot
         val handle = getAvailableSIMCardLabels().sortedBy { it.id }[wantedSimIndex].handle
-        launchCallIntent(recipient, handle)
+        launchCallIntentWrapper(recipient, handle)
     }
 }
 
@@ -98,4 +103,50 @@ fun SimpleActivity.getHandleToUse(intent: Intent?, phoneNumber: String, callback
             }
         }
     }
+}
+
+fun BaseSimpleActivity.launchCallIntentWrapper(recipient: String, handle: PhoneAccountHandle? = null) {
+    val actualDialNumberInConfMode: String = CallManager.actualDialNumberInRunoConfMode
+    if(!CallManager.isInRunoConfMode) {
+        val runoConferenceNumber: String = config.getRunoConferenceNumber().toString()
+        if (runoConferenceNumber != "-1") {
+            val trackingSimSlot = config.getTrackingSimSlot()
+            if (trackingSimSlot != -1) {
+                var currentSimSlot: Int = if (areMultipleSIMsAvailable()) getCallSimCardSlot() else 1
+                if (currentSimSlot == -1) currentSimSlot = handle?.let { getSimSlotIndexFromAccountId(it.id) } ?: 1
+                if (trackingSimSlot == currentSimSlot) {
+                    Log.d("CallActivityP", "Actual Conference number is $recipient")
+                    CallManager.actualDialNumberInRunoConfMode = recipient
+                    CallManager.isInRunoConfMode = true
+                    launchCallIntent(runoConferenceNumber, handle)
+                    return
+                } else {
+                    Log.d("CallActivityP", "currentSimSlot is $currentSimSlot && trackingSimSlot is $trackingSimSlot")
+                }
+            }
+        }
+        Log.d("CallActivityP", "Resetting conference number is $actualDialNumberInConfMode")
+        CallManager.resetConferenceMode()
+    }
+    Log.d("CallActivityP", "Conference mode is already in progress")
+    launchCallIntent(recipient, handle)
+}
+
+fun BaseSimpleActivity.getSimSlotIndexFromAccountId(accountIdToFind: String): Int {
+    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+        return -1;
+    }
+    telecomManager.callCapablePhoneAccounts.forEachIndexed { index, account: PhoneAccountHandle ->
+        val phoneAccount: PhoneAccount = telecomManager.getPhoneAccount(account)
+        val accountId: String = phoneAccount.accountHandle
+            .id
+        if (accountIdToFind == accountId) {
+            return index
+        }
+    }
+    accountIdToFind.toIntOrNull()?.let {
+        if (it >= 0)
+            return it
+    }
+    return -1
 }

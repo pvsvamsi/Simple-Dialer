@@ -23,6 +23,16 @@ class CallManager {
         private val calls = mutableListOf<Call>()
         private val listeners = CopyOnWriteArraySet<CallManagerListener>()
 
+
+
+        var isInRunoConfMode = false
+        var actualDialNumberInRunoConfMode = "-1"
+
+        fun resetConferenceMode(){
+            isInRunoConfMode = false
+            actualDialNumberInRunoConfMode = "-1"
+        }
+
         fun onCallAdded(call: Call) {
             this.call = call
             calls.add(call)
@@ -180,15 +190,18 @@ class CallManager {
             }
         }
 
-        fun merge() {
+        fun merge(): Boolean {
             val conferenceableCalls = call!!.conferenceableCalls
             if (conferenceableCalls.isNotEmpty()) {
                 call!!.conference(conferenceableCalls.first())
+                return true
             } else {
                 if (call!!.hasCapability(Call.Details.CAPABILITY_MERGE_CONFERENCE)) {
                     call!!.mergeConference()
+                    return true
                 }
             }
+            return false
         }
 
         fun addListener(listener: CallManagerListener) {

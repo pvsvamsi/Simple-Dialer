@@ -1,5 +1,6 @@
 package `in`.runo.dialer.extensions
 
+import `in`.runo.dialer.helpers.CallManager
 import android.annotation.SuppressLint
 import android.content.Context
 import android.media.AudioManager
@@ -43,4 +44,24 @@ fun Context.areMultipleSIMsAvailable(): Boolean {
     } catch (ignored: Exception) {
         false
     }
+}
+
+
+@SuppressLint("MissingPermission")
+fun Context.getCallSimCardSlot(): Int {
+    var slot = if(areMultipleSIMsAvailable()) -1 else 1
+    try {
+        val accounts = telecomManager.callCapablePhoneAccounts
+        if (accounts.size > 1) {
+            accounts.forEachIndexed { index, account ->
+                if (account == CallManager.getPrimaryCall()?.details?.accountHandle) {
+                    slot = index + 1;
+                }
+            }
+        } else {
+            slot = 1;
+        }
+    } catch (ignored: Exception) {
+    }
+    return slot;
 }

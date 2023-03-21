@@ -11,6 +11,7 @@ import `in`.runo.dialer.R
 import `in`.runo.dialer.activities.SimpleActivity
 import `in`.runo.dialer.adapters.RecentCallsAdapter
 import `in`.runo.dialer.extensions.config
+import `in`.runo.dialer.extensions.launchCallIntentWrapper
 import `in`.runo.dialer.helpers.RecentsHelper
 import `in`.runo.dialer.interfaces.RefreshItemsListener
 import `in`.runo.dialer.models.RecentCall
@@ -94,10 +95,10 @@ class RecentsFragment(context: Context, attributeSet: AttributeSet) : MyViewPage
                     val recentCall = it as RecentCall
                     if (context.config.showCallConfirmation) {
                         CallConfirmationDialog(activity as SimpleActivity, recentCall.name) {
-                            activity?.launchCallIntent(recentCall.phoneNumber)
+                            activity?.launchCallIntentWrapper(recentCall.phoneNumber)
                         }
                     } else {
-                        activity?.launchCallIntent(recentCall.phoneNumber)
+                        activity?.launchCallIntentWrapper(recentCall.phoneNumber)
                     }
                 }.apply {
                     recents_list.adapter = this

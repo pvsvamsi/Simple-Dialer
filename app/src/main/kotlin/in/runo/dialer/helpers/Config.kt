@@ -36,12 +36,14 @@ class Config(context: Context) : BaseConfig(context) {
 
     fun getCustomSIM(number: String) = prefs.getString(REMEMBER_SIM_PREFIX + number, "")
 
-    fun getConferenceNumber() = prefs.getString(CONFERENCE_CALL_NUMBER, "-1")
+    //For testing provide a default conference number. -1 => Runo Conference call mode is disabled
+    fun getRunoConferenceNumber() = prefs.getString(RUNO_CONFERENCE_CALL_NUMBER, "-1")
 
-    fun setConferenceNumber(number: String) {
-        prefs.edit().putString(CONFERENCE_CALL_NUMBER, number).apply()
+    fun setRunoConferenceNumber(number: String) {
+        prefs.edit().putString(RUNO_CONFERENCE_CALL_NUMBER, number).apply()
     }
 
+    //For testing provide a default tracking sim slot (1 or 2). -1 => No tracking
     fun getTrackingSimSlot() = prefs.getInt(TRACKING_SIM_SLOT, -1)
 
     fun setTrackingSimSlot(slot: Int) {
